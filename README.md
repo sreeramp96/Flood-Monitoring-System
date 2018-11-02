@@ -9,6 +9,9 @@ This project is a real-time flood Monitoring system
 
 References : 
 https://www.youtube.com/watch?v=jKtQxvzp1A0&feature=youtu.be
+
 https://opensourceforu.com/2018/09/using-opencv-for-machine-learning-in-real-time-computer-vision-and-image-processing/
+
 https://lembergsolutions.com/blog/how-process-live-video-stream-using-ffmpeg-and-opencv
+
 http://www.jackyle.com/2017/11/real-time-object-detection-with-deep.html?m=1
