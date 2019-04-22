@@ -6,13 +6,17 @@ import cv2
 scaling_factorx = 0.8
 scaling_factory = 0.8
 
-cap = cv2.VideoCapture(0) #start recording
-fgbg = cv2.createBackgroundSubtractorMOG2() #background subtrator
+#start recording
+cap = cv2.VideoCapture(0) 
+#background subtractor
+fgbg = cv2.createBackgroundSubtractorMOG2() 
 count = 0
 
 while(1):
  
+  #Capture frame-by-frame
   ret, frame = cap.read()
+  # ret = 1 if the video is captured; frame is the image
   
   cv2.imwrite('frame%d.jpg' %count, frame)
   count = count + 1
@@ -31,5 +35,5 @@ while(1):
   k = cv2.waitKey(5);
   if k == 27:
     break
-cap.release()
+cap.release() #When everything done, release the capture
 cv2.destroyAllWindows()
