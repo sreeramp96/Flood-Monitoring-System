@@ -18,7 +18,8 @@ while(1):
   ret, frame = cap.read()
   # ret = 1 if the video is captured; frame is the image
   
-  cv2.imwrite('frame%d.jpg' %count, frame)
+  if count%250 == 0
+   cv2.imwrite('frame%d.jpg' %count, frame)
   count = count + 1
   
   frame = cv2.resize(frame, None, fx = scaling_factorx, fy = scaling_factory, interpolation = cv2.INTER_AREA)
