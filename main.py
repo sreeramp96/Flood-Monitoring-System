@@ -47,7 +47,7 @@ while(1):
 			print(length)
 			height.append(length)
 
-    cv2.imshow("Outpur Frame", frame)
+    cv2.imshow("Output Frame", frame)
 
     frame = cv2.resize(frame, None, fx = scaling_factorx, fy = scaling_factory, interpolation = cv2.INTER_AREA)
 
