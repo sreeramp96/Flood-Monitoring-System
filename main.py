@@ -7,10 +7,10 @@ import cv2
 import random
 import math
 import matplotlib.pyplot as plt
-from firebase import firebase
-import json
+#from firebase import firebase
+#import json
 
-firebase = firebase.FirebaseApplication('https://floodmonitoringsystem-5c2e1.firebaseio.com/', None)
+#firebase = firebase.FirebaseApplication('https://floodmonitoringsystem-5c2e1.firebaseio.com/', None)
 
 scaling_factorx = 0.8
 scaling_factory = 0.8
@@ -72,9 +72,9 @@ while (1):
                 length = y1 - y2
                 print(length)
                 height.append(length)
-                if length < 100:
-                    data = {'height': length, 'message': 'crtical'}
-                    result = firebase.post("/floodmonitoringsystem-5c2e1/data/", data)
+                #if length < 100:
+                    #data = {'height': length, 'message': 'crtical'}
+                    #result = firebase.post("/floodmonitoringsystem-5c2e1/data/", data)
 
 cv2.imshow("Output Frame", frame)
 
