@@ -1,20 +1,23 @@
+# OpenCV packages for Python
+import cv2
+# Python plotting package
+import matplotlib.pyplot as plt
+# Fork of argparse to add features and simplify its code
+import argparse
+# functions to make basic image processing functions
+import imutils
+# this for add math function
+import math
+import time 
+# package for array computing with Python
+import pandas as pd 
+from numpy import asarray as pn
+from sklearn.linear_model import LinearRegression
 from imutils.perspective import four_point_transform
 from imutils import paths
-import numpy as np
-import imutils
-import argparse
-import cv2
-import random
-import math
-import matplotlib.pyplot as plt
-from firebase import firebase
-import json
+from sklearn.metrics import mean_squared_error
 
-# firebase = firebase.FirebaseApplication('https://floodmonitoringsystem-5c2e1.firebaseio.com/', None)
-
-scaling_factorx = 0.8
-scaling_factory = 0.8
-
+# capture frames from a camera
 cap = cv2.VideoCapture(0)
 
 cap.set(3, 640)
@@ -22,24 +25,19 @@ cap.set(4, 480)
 count = 0
 height = []
 
-# for capture frame by frame
-nframes = 20
 flag = 0
 
+# reads frames from a camera
 ret, frame = cap.read()
-cv2.imwrite("test.jpg", frame)
-im = cv2.imread("test.jpg")
+cv2.imwrite("testimage.jpg", frame)
+im = cv2.imread("testimage.jpg")
 
-# Select ROI
 r = cv2.selectROI(img=im, windowName="test")
-# if __name__ == '__main__' :
-# im = cv2.imread("image.jpg") # Read image
-# r = cv2.selectROI(im)  # Select ROI
-# imCrop = im[int(r[1]):int(r[1]+r[3]), int(r[0]):int(r[0]+r[2])] # Crop image
-# cv2.imshow("Image", imCrop)# Display cropped image
-# cv2.waitKey(0)
 
+t = time.localtime()
+current_time = time.strftime("%H:%M:%S", t)
 
+# loop runs if capturing has been initialized 
 while (1):
 
     ret, frame = cap.read()
@@ -47,47 +45,78 @@ while (1):
     if frame is None:
         break
 
+    # Crop image
     frame = frame[int(r[1]):int(r[1] + r[3]), int(r[0]):int(r[0] + r[2])]
+    # Convert the img to grayscale 
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    # Apply edge detection method on the image 
+    edges = cv2.Canny(gray, 100, 120)
+    # Run Hough on edge detected image
+    lines = cv2.HoughLinesP(edges, 1, math.pi/180, 20, None, 20, 480)
+    dot1 = (lines[0][0][0], lines[0][0][1])
+    dot2 = (lines[0][0][2], lines[0][0][3])
+    slope = ((lines[0][0][3] - lines[0][0][1])/(lines[0][0][2] - lines[0][0][0]))
+    #cv2.line draws a line in img from dot1 to dot2
+    # (255,0,0) denotes the colour of the line to be drawn
+    if 0 <= slope <= 0.15:
+        cv2.line(frame, dot1, dot2, (255, 0, 0), 3)
+        length = 150 - lines[0][0][3]
+        print(length)
+        height.append(length)
 
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    # Find the edges in the image using canny detector
-    edges = cv2.Canny(gray, 50, 200)
-    # Detect points that form a line
-    lines = cv2.HoughLinesP(edges, 1, np.pi / 180, 100, minLineLength=10, maxLineGap=250)
-    # Draw lines on the image
-    if lines is not None:
-        for line in lines:
-            for x1, x2, y1, y2 in line:
-                dot1 = (x1, y1)
-                dot2 = (x2, y2)
-                cv2.line(frame, dot1, dot2, (255, 0, 0), 3)
-                length = y1 - y2
-                print(length)
-                height.append(length)
-                # if length < 100:
-                # data = {'height': length, 'message': 'crtical'}
-                # result = firebase.post("/floodmonitoringsystem-5c2e1/data/", data)
-    cv2.imshow("Output Frame", frame)
-
-    frame = cv2.resize(frame, None, fx=scaling_factorx, fy=scaling_factory, interpolation=cv2.INTER_AREA)q
-    edged_frame = cv2.Canny(frame, 1, 100)
-    cv2.imshow('Edged Frame', edged_frame)
+        cv2.imshow("Detected Line", frame)
+        # finds edges in the input video and 
+        # marks them in the output map edges
+        edged_frame = cv2.Canny(frame, 1, 100)
+        cv2.imshow('Edged Frame', edged_frame)
+    
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
 x = []
 y = []
-
+file = open("Saved.txt","a")
 for i in range(len(height)):
-    x.append(i)
-    y.append(height[i])
+	x.append(i)
+	y.append(height[i])
+	file.write(str(x[i-1])+","+str(y[i-1])+"\n") 
+
+X=np(x)
+Y=np(y) 
+
+X = X.reshape(len(X),1)
+Y = Y.reshape(len(Y),1)
+
+model = LinearRegression()
+model.fit(X,Y)
+
+model = LinearRegression().fit(X,Y)
+r_sq = model.score(X,Y)
+
+y_pred = model.predict(X)
+y_pred = model.intercept_+ model.coef_*X
+
+print('Predicted Response:', y_pred, sep='\n')
+print('Start :', current_time)
+print('Coefficient of Determination:', r_sq)
+print('Intercept:', model.intercept_)
+
+accuracy = mean_squared_error(y, y_pred)
+print('Accuracy :', accuracy)
+
+t = time.localtime()
+current_time2 = time.strftime("%H:%M:%S", t)
+print('Stop  :', current_time2)
+
+plt.plot(X,Y,'.',color='black')
+
 
 cap.release()
 cv2.destroyAllWindows()
 
-print(x, y)
-plt.plot(x, y)
-plt.xlabel('x - axis')
-plt.ylabel('y - axis')
-plt.title('Height')
-plt.show()
+plt.plot(X,y_pred)
+
+plt.title('Test Data')
+plt.xlabel('Time')
+plt.ylabel('Height')
+plt.show() 
